@@ -3,7 +3,7 @@ namespace csnets.Neural;
 
 public class DenseLayer {
 
-    public List <Neuron> neurons;
+    public List <INeuron> neurons;
 
     /// <summary>
     /// initializes random neurons for this dense layer with a given Random
@@ -11,10 +11,15 @@ public class DenseLayer {
     /// <param name="numberOfNeurons">the number of neurons to initialize</param>
     /// <param name="numberOfInputs">the number of inputs to each neuron / the number of neurons in the DenseLayer before this one</param>
     /// <param name="random">the random to use</param>
-    public DenseLayer ( int numberOfNeurons, int numberOfInputs, Random random ) {
+    public DenseLayer ( int numberOfNeurons, int numberOfInputs, Random random, float? momentum ) {
         neurons = [];
         for (int i = 0; i < numberOfNeurons; i++)
         {
+            if (momentum != null)
+            {
+                neurons.Add ( new MomentalNeuron ( random, numberOfInputs, momentum.Value ) );
+                continue;
+            }
             neurons.Add (new Neuron (random, numberOfInputs));
         }
     }
