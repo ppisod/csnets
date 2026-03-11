@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Neural\Initializations\" />
+      <Folder Include="Neural\Optimizers\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Neural\Initialization\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Neural\Initialization\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Neural\Initialization\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ScottPlot" Version="5.1.57" />
+    </ItemGroup>
+
+</Project>
