@@ -45,19 +45,19 @@ public class FeedForwardNet {
         // TODO: Check if this is the best way to do it
         foreach (var neuron in layers[0].neurons)
         {
-            if (neuron.weights.Count != inputSize) throw new Exception ( "First layer neurons must have same number of inputs as input size." );
+            if (neuron.weights.Length != inputSize) throw new Exception ( "First layer neurons must have same number of inputs as input size." );
         }
         this.inputSize = inputSize;
         this.layers = layers;
     }
 
-    public List <float> Run <A> ( List <float> inputs ) where A : IActivation {
-        if (inputs.Count != inputSize)
+    public float[] Run <A> ( float[] inputs ) where A : IActivation {
+        if (inputs.Length != inputSize)
         {
             throw new Exception ( "Inputs does not match set input size." );
         }
 
-        List <float> lastDenseLayerOutput = inputs;
+        float[] lastDenseLayerOutput = inputs;
         for (var index = 0; index < layers.Count; index++)
         {
             var layer = layers[index];
@@ -67,9 +67,9 @@ public class FeedForwardNet {
         return lastDenseLayerOutput;
     }
 
-    public void DebugPrint <A, L> ( List<float> inputs, List <float> targets ) where A : IActivation where L : ILoss {
+    public void DebugPrint <A, L> ( float[] inputs, float[] targets ) where A : IActivation where L : ILoss {
         var outputs = Run <A> ( inputs );
-        for (int i = 0; i < outputs.Count; i++)
+        for (int i = 0; i < outputs.Length; i++)
         {
             var output = outputs[i];
             var target = targets[i];
@@ -77,7 +77,7 @@ public class FeedForwardNet {
         }
 
         float loss = 0;
-        for (int i = 0; i < outputs.Count; i++)
+        for (int i = 0; i < outputs.Length; i++)
         {
             loss += L.Calculate ( outputs[i], targets[i] );
         }
@@ -85,15 +85,15 @@ public class FeedForwardNet {
         Console.WriteLine ( $"Loss: {loss}" );
     }
 
-    public void Train <A, L> ( List <float> inputs, List <float> targets, float learningRate, bool log ) where A : IActivation where L : ILoss {
-        if (inputs.Count != inputSize)
+    public void Train <A, L> ( float[] inputs, float[] targets, float learningRate, bool log ) where A : IActivation where L : ILoss {
+        if (inputs.Length != inputSize)
         {
             throw new Exception ( "Inputs does not match set input size." );
         }
 
         // caching
-        List <List <float>> layerInputs = new List <List <float>> ();
-        List <float> currentLayerInputs = inputs;
+        List <float[]> layerInputs = new List <float[]> ();
+        float[] currentLayerInputs = inputs;
 
         // Forward Pass
         for (var index = 0; index < layers.Count; index++)
@@ -104,17 +104,17 @@ public class FeedForwardNet {
             currentLayerInputs = layer.ForwardPass <A> ( currentLayerInputs, isLast );
         }
 
-        List <float> outputs = currentLayerInputs;
+        float[] outputs = currentLayerInputs;
         if (outputs.Count != targets.Count)
         {
             throw new Exception ( "Outputs and targets must have same length." );
         }
 
         // Calculate initial blame from Loss
-        List <float> blame = new List <float> ();
-        for (var index = 0; index < outputs.Count; index++)
+        float[] blame = new float[outputs.Length];
+        for (var index = 0; index < outputs.Length; index++)
         {
-            blame.Add ( L.CalculateDerivative ( outputs[index], targets[index] ) );
+            blame[index] = ( L.CalculateDerivative ( outputs[index], targets[index] ) );
         }
 
         // Backward Pass

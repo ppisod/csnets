@@ -22,44 +22,28 @@ public class DenseLayer {
     public DenseLayer ( int numberOfNeurons, int numberOfInputs ) : this ( numberOfNeurons, numberOfInputs, new Random () ) { }
 
 
-    public List<float> ForwardPass <A> ( List <float> inputs, bool isLastLayer ) where A : IActivation {
-        List<float> outputs = [];
-        foreach (var neuron in neurons)
-        {
-            outputs.Add (neuron.ForwardPass <A> ( inputs, !isLastLayer ));
-        }
-        return outputs;
-    }
-
-    public List <float> BackProp <A> ( List <float> inputs, List <float> blame, float learningRate, bool isLastLayer = false ) where A : IActivation {
-        List <float> lastLayerBlame = new List <float> (new float[inputs.Count]);
-
+    public float[] ForwardPass <A> ( float[] inputs, bool isLastLayer ) where A : IActivation {
+        float[] outputs = [];
         for (var index = 0; index < neurons.Count; index++)
         {
             var neuron = neurons[index];
-            var blameForMe = blame[index];
+            outputs[index] = ( neuron.ForwardPass <A> ( inputs, !isLastLayer ) );
+        }
 
-            float myFinalBlame;
-            if (isLastLayer) {
-                myFinalBlame = blameForMe;
-            } else {
-                var rawOutput = neuron.ForwardPass <A> ( inputs, false );
-                myFinalBlame = A.Df ( rawOutput ) * blameForMe;
-            }
+        return outputs;
+    }
 
-            for (var inputIndex = 0; inputIndex < inputs.Count; inputIndex++)
+    public float[] BackProp <A> ( float[] inputs, float[] blame, float learningRate, bool isLastLayer = false ) where A : IActivation {
+        float[] lastLayerBlame = new float[inputs.Length];
+
+        for (var index = 0; index < neurons.Count; index++)
+        {
+            var neuronBlame = neurons[index].BackProp <A> ( inputs, blame[index], learningRate, isLastLayer );
+
+            for (var i = 0; i < lastLayerBlame.Length; i++)
             {
-                var inputBlame = myFinalBlame * neurons[index].weights[inputIndex];
-                lastLayerBlame[inputIndex] += inputBlame;
+                lastLayerBlame[i] += neuronBlame[i];
             }
-
-            for (var inputIndex = 0; inputIndex < inputs.Count; inputIndex++)
-            {
-                var deltaWeight = myFinalBlame * inputs[inputIndex];
-                neurons[index].weights[inputIndex] -= deltaWeight * learningRate;
-            }
-
-            neurons[index].bias -= myFinalBlame * learningRate;
         }
 
         return lastLayerBlame;
