@@ -24,8 +24,7 @@ public class DenseLayer {
         }
     }
 
-    public DenseLayer ( int numberOfNeurons, int numberOfInputs ) : this ( numberOfNeurons, numberOfInputs, new Random () ) { }
-
+    public DenseLayer ( int numberOfNeurons, int numberOfInputs, float? momentum ) : this ( numberOfNeurons, numberOfInputs, new Random (), momentum ) { }
 
     public float[] ForwardPass <A> ( float[] inputs, bool isLastLayer ) where A : IActivation {
         float[] outputs = [];
