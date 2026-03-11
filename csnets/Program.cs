@@ -10,7 +10,7 @@ MidPointGenFunc gen = new ()
     c = 7,
     m = 1,
 };
-List<MidPointGenFuncOutput> dataset = gen.gen(300);
+List<MidPointGenFuncOutput> dataset = gen.gen(1000);
 
 foreach (var datapoint in dataset)
 {
