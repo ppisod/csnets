@@ -22,7 +22,7 @@ public class Neuron : INeuron {
     }
 
     public virtual float ForwardPass <A> ( float[] inputs, bool activate ) where A : IActivation {
-        if (inputs.Count != weights.Count) throw new Exception ("Input size does not match weight size.");
+        if (inputs.Length != weights.Length) throw new Exception ("Input size does not match weight size.");
         float sum = 0;
         for (var index = 0; index < inputs.Length; index++)
         {

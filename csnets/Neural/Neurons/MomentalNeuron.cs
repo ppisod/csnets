@@ -7,7 +7,7 @@ public class MomentalNeuron (
     ) : Neuron ( random, inputSize ) {
 
     public readonly float momentum = momentum;
-    public List <float> weightVelocities = new (inputSize);
+    public float[] weightVelocities = new float[inputSize];
     public float biasVelocity = 0;
 
     public override float[] BackProp <A> (

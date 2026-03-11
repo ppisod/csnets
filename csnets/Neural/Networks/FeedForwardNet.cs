@@ -7,7 +7,7 @@ public class FeedForwardNet {
     public readonly int inputSize;
     public List <DenseLayer> layers;
 
-    public FeedForwardNet ( int inputs, int numLayers, int outputs, int? numNeuronsPerLayer_Min, int? numNeuronsPerLayer_Max ) {
+    public FeedForwardNet ( int inputs, int numLayers, int outputs, float momentum, int? numNeuronsPerLayer_Min, int? numNeuronsPerLayer_Max ) {
         inputSize = inputs;
         var random = new Random ();
         var currentInputSize = inputSize;
@@ -22,7 +22,9 @@ public class FeedForwardNet {
                 layers.Add (
                     new DenseLayer (
                         outputs,
-                        currentInputSize, random
+                        currentInputSize,
+                        random,
+                        momentum
                     )
                 );
                 break;
@@ -32,7 +34,9 @@ public class FeedForwardNet {
             layers.Add (
                 new DenseLayer (
                     k,
-                    currentInputSize, random
+                    currentInputSize,
+                    random,
+                    momentum
                 )
             );
 
@@ -105,7 +109,7 @@ public class FeedForwardNet {
         }
 
         float[] outputs = currentLayerInputs;
-        if (outputs.Count != targets.Count)
+        if (outputs.Length != targets.Length)
         {
             throw new Exception ( "Outputs and targets must have same length." );
         }
