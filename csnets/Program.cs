@@ -1,4 +1,5 @@
-﻿using csnets.DataGen;
-using csnets.Neural.Activations;
-using csnets.Neural.Loss;
-using csnets.Neural.Networks;
+﻿
+using csnets.Neural.TrainingProjects;
+
+MPGFNetwork network = new (1000, 3, 3, 5, 10, 0.9f);
+network.Train (10);
