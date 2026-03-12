@@ -6,24 +6,20 @@ using csnets.Neural.Networks;
 namespace csnets.Neural.TrainingProjects;
 
 public class MPGFNetwork (
+    int gen_C, int gen_M,
     int datasetSize,
-    int epochs,
     int layers,
     int minNeurons,
     int maxNeurons,
     float momentum
 ) : INet {
     public FeedForwardNet net { get; set; } = new ( 2, layers, 1, momentum, minNeurons, maxNeurons );
+    public MidPointGenFunc gen { get; set; } = new () { c = gen_C, m = gen_M };
 
     public int datasetSize = datasetSize;
 
 
     public void Train ( int epochs ) {
-        MidPointGenFunc gen = new ()
-        {
-            c = 7,
-            m = 1,
-        };
         List<MidPointGenFuncOutput> dataset = gen.gen(datasetSize);
         for (int i = 0; i < epochs; i++)
         {
@@ -36,5 +32,16 @@ public class MPGFNetwork (
 
     public float[] Run ( float[] inputs ) {
         return net.Run <ReLU> (inputs);
+    }
+
+    public float Run ( ) {
+        List <MidPointGenFuncOutput> dataset = gen.gen ( datasetSize );
+        List <float> rs = [];
+        foreach (var datapoint in dataset)
+        {
+
+            rs.Add((datapoint.out_M - Run([datapoint.in_A, datapoint.in_B])[0]) / datapoint.out_M);
+        }
+        return rs.Average ();
     }
 }

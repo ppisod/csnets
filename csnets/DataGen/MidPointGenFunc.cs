@@ -26,7 +26,7 @@ public class MidPointGenFunc {
             in_A = (float) ( random.NextDouble () * range ) + offset,
             in_B = (float) ( random.NextDouble () * range ) + offset
         };
-        output.out_M = getV ( output.in_A + output.in_B / 2 );
+        output.out_M = getV ( (output.in_A + output.in_B) / 2 );
         return output;
     }
 

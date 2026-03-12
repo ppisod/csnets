@@ -11,5 +11,8 @@ public class MNISTNetwork : INet {
     public float[] Run ( float[] inputs ) {
         throw new NotImplementedException ();
     }
+    public float Run ( ) {
+        throw new NotImplementedException ();
+    }
 
 }
