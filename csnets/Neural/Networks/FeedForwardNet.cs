@@ -107,7 +107,7 @@ public class FeedForwardNet {
         Console.WriteLine ( $"Loss: {loss}" );
     }
 
-    public void Train <A, L> ( float[] inputs, float[] targets, float learningRate, bool log ) where A : IActivation where L : ILoss {
+    public void Train <A, L> ( float[] inputs, float[] targets, float learningRate, bool log = true, bool batching = false ) where A : IActivation where L : ILoss {
         if (inputs.Length != inputSize)
         {
             throw new Exception ( "Inputs does not match set input size." );
@@ -145,7 +145,7 @@ public class FeedForwardNet {
             var layer = layers[index];
             var inputsForThisLayer = layerInputs[index];
             bool isLast = index == layers.Count - 1;
-            blame = layer.BackProp <A> ( inputsForThisLayer, blame, learningRate, isLast );
+            blame = layer.BackProp <A> ( inputsForThisLayer, blame, learningRate, isLast, batching );
         }
 
         if (log)
@@ -160,7 +160,22 @@ public class FeedForwardNet {
         float learningRate,
         bool log
     ) where A : IActivation where L : ILoss {
-        
+        if (inputs.Length != targets.Length)
+        {
+            throw new Exception ( "Inputs and targets must have same length." );
+        }
+
+        for (int i = 0; i < inputs.Length; i++)
+        {
+
+            Train <A, L> ( inputs[i], targets[i], learningRate, log, true );
+
+        }
+
+        foreach (var layer in layers)
+        {
+            layer.ApplyGradients ( learningRate, inputs.Length );
+        }
     }
 
 }

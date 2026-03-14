@@ -37,12 +37,12 @@ public class DenseLayer {
         return outputs;
     }
 
-    public float[] BackProp <A> ( float[] inputs, float[] blame, float learningRate, bool isLastLayer = false ) where A : IActivation {
+    public float[] BackProp <A> ( float[] inputs, float[] blame, float learningRate, bool isLastLayer = false, bool batching = false ) where A : IActivation {
         float[] lastLayerBlame = new float[inputs.Length];
 
         for (var index = 0; index < neurons.Count; index++)
         {
-            var neuronBlame = neurons[index].BackProp <A> ( inputs, blame[index], learningRate, isLastLayer );
+            var neuronBlame = neurons[index].BackProp <A> ( inputs, blame[index], learningRate, isLastLayer, !batching );
 
             for (var i = 0; i < lastLayerBlame.Length; i++)
             {
@@ -51,6 +51,13 @@ public class DenseLayer {
         }
 
         return lastLayerBlame;
+    }
+
+    public void ApplyGradients ( float learningRate, int batches ) {
+        foreach (var neuron in neurons)
+        {
+            neuron.ApplyGradients ( learningRate, batches );
+        }
     }
 
 

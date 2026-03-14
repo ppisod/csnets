@@ -25,7 +25,7 @@ public class MPGFNetwork (
         {
             foreach (var datapoint in dataset)
             {
-                net.Train <ReLU, MeanSquaredError> ([datapoint.in_A, datapoint.in_B ], [datapoint.out_M], 0.001f, true);
+                net.Train <ReLU, MeanSquaredError> ([datapoint.in_A, datapoint.in_B], [datapoint.out_M], 0.001f);
             }
         }
     }
