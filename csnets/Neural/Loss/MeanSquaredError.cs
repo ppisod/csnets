@@ -7,4 +7,5 @@ public class MeanSquaredError : ILoss {
     public static float CalculateDerivative ( float output, float target ) {
         return output - target;
     }
+    // s
 }
