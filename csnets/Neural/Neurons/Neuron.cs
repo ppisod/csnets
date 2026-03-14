@@ -22,6 +22,9 @@ public class Neuron : INeuron {
             weights[i] = ( (float) random.NextDouble () * 2 - 1 );
         }
         bias = 0;
+
+        weightAccumulator = new float[inputSize];
+        biasAccumulator = 0;
     }
 
     public virtual float ForwardPass <A> ( float[] inputs, bool activate ) where A : IActivation {
