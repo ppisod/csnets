@@ -1,14 +1,15 @@
 namespace csnets.DataGen;
 
 public struct MNISTImage {
-    public const int PixelCount = 28 * 28;
-    public const int LabelCount = 10;
     public float[] Pixels;  // 784 floats (28x28), normalized to [0, 1]
     public int Label;        // 0-9
     public float[] LabelOneHot; // 10 floats, one-hot encoded
 }
 
 public class MNIST {
+
+    public readonly int PixelCount = 28 * 28;
+    public readonly int LabelCount = 10;
 
     public string DataDir;
 

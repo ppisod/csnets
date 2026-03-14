@@ -46,7 +46,7 @@ public class DenseLayer {
 
             for (var i = 0; i < lastLayerBlame.Length; i++)
             {
-                lastLayerBlame[i] += neuronBlame[i];
+                lastLayerBlame[i] += neuronBlame.nextLayerBlame[i];
             }
         }
 

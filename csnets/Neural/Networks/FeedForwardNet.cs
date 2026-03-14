@@ -44,6 +44,24 @@ public class FeedForwardNet {
         }
     }
 
+    public FeedForwardNet (
+        int inputs,
+        float momentum,
+        int[] layers,
+        int output
+    ) {
+        inputSize = inputs;
+        var random = new Random ();
+        var currentInputSize = inputSize;
+        this.layers = [];
+        foreach (var layer in layers)
+        {
+            this.layers.Add ( new DenseLayer (layer, currentInputSize, random, momentum) );
+            currentInputSize = layer;
+        }
+        this.layers.Add (new DenseLayer (output, currentInputSize, random, momentum));
+    }
+
     public FeedForwardNet ( int inputSize, List <DenseLayer> layers )  {
         if (layers.Count == 0) throw new Exception ( "Must have at least one layer" );
         // TODO: Check if this is the best way to do it
@@ -134,6 +152,15 @@ public class FeedForwardNet {
         {
             DebugPrint <A, L> ( inputs, targets );
         }
+    }
+
+    public void Train <A, L> (
+        float[][] inputs,
+        float[][] targets,
+        float learningRate,
+        bool log
+    ) where A : IActivation where L : ILoss {
+        
     }
 
 }

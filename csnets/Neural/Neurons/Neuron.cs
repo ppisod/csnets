@@ -5,6 +5,9 @@ public class Neuron : INeuron {
 
     public float[] weights { get; set; }
     public float bias { get; set; }
+    public float[] weightAccumulator { get; set; }
+    public float biasAccumulator { get; set; }
+    public bool batching { get; set; }
 
 
     /// <summary>
@@ -46,17 +49,21 @@ public class Neuron : INeuron {
     /// <param name="blame">the blame assigned to this neuron from the next layer</param>
     /// <param name="learningRate">how aggressively to update weights</param>
     /// <param name="isLastLayer">if true, skip activation derivative (output layer has no activation)</param>
+    /// <param name="updateWeights">if false, don't update weights AND return weight gradient</param>'
     /// <returns>blame for each input (to pass to the previous layer)</returns>
-    public virtual float[] BackProp <A> ( float[] inputs, float blame, float learningRate, bool isLastLayer = false ) where A : IActivation {
+    public virtual BackPropResult BackProp <A> ( float[] inputs, float blame, float learningRate, bool isLastLayer = false, bool updateWeights = true) where A : IActivation {
+        BackPropResult result;
         float myFinalBlame;
         if (isLastLayer) {
             myFinalBlame = blame;
+            result.blame = blame;
         } else {
             // if neuron didn't contribute to output because of the Activation func
             // then it should not be blamed for the output
             // that's why we see if Activation function fucked up the output
             var rawOutput = ForwardPass <A> ( inputs, false );
             myFinalBlame = A.Df ( rawOutput ) * blame;
+            result.blame = myFinalBlame;
         }
 
         // Change activations in proportion to weights. (We cannot change it, therefore we return values as blame)
@@ -65,16 +72,46 @@ public class Neuron : INeuron {
         {
             inputBlame[i] = myFinalBlame * weights[i];
         }
+        result.nextLayerBlame = inputBlame;
+
+        float[] weightGradients = new float[inputs.Length];
 
         // Change weights in proportion to activations.
         for (var i = 0; i < inputs.Length; i++)
         {
+            if (!updateWeights)
+            {
+                weightGradients[i] = - ( myFinalBlame * inputs[i] * learningRate );
+                continue;
+            }
             weights[i] -= myFinalBlame * inputs[i] * learningRate;
         }
+
+        result.weightGradient = weightGradients;
 
         // Update bias
         bias -= myFinalBlame * learningRate;
 
-        return inputBlame;
+        result.biasGradient = -myFinalBlame * learningRate;
+
+        return result;
+    }
+
+    public virtual void AccumulateGradients ( float[] inputs, float realBlame ) {
+        for (int i = 0; i < inputs.Length; i++)
+        {
+            weightAccumulator[i] += realBlame * inputs[i];
+        }
+
+        biasAccumulator += realBlame;
+    }
+    public virtual void ApplyGradients ( float learningRate, int batches ) {
+        for (int i = 0; i < weights.Length; i++)
+        {
+            weights[i] -= (weightAccumulator[i] / batches) * learningRate;
+            weightAccumulator[i] = 0;
+        }
+        bias -= (biasAccumulator / batches) * learningRate;
+        biasAccumulator = 0;
     }
 }
