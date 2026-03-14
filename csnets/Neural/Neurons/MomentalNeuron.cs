@@ -12,24 +12,21 @@ public class MomentalNeuron (
     public float[] weightVelocities = new float[inputSize];
     public float biasVelocity = 0;
 
-    public float[] weightGradAccumulator = new float[inputSize];
-    public float biasGradAccumulator = 0;
-
     public bool batching = false;
 
     public override void ApplyGradients ( float learningRate, int batches ) {
         for (int i = 0; i < weights.Length; i++)
         {
-            float avgGrad = weightGradAccumulator[i] / batches;
+            float avgGrad = weightAccumulator[i] / batches;
             weightVelocities[i] = ( momentum * weightVelocities[i] ) - ( avgGrad * learningRate );
             weights[i] += weightVelocities[i];
-            weightGradAccumulator[i] = 0;
+            weightAccumulator[i] = 0;
         }
 
-        float avgBiasGrad = biasGradAccumulator / batches;
+        float avgBiasGrad = biasAccumulator / batches;
         biasVelocity = ( momentum * biasVelocity ) - ( avgBiasGrad * learningRate );
         bias += biasVelocity;
-        biasGradAccumulator = 0;
+        biasAccumulator = 0;
     }
 
     public override BackPropResult BackProp <A> (
