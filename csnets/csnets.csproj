@@ -14,6 +14,12 @@
 
     <ItemGroup>
       <Compile Remove="Neural\Initialization\**" />
+      <Compile Update="Neural\Initializations\RandomInit.cs">
+        <DependentUpon>IInitialization.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Neural\Initializations\HeInit.cs">
+        <DependentUpon>IInitialization.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
