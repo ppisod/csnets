@@ -1,4 +1,5 @@
 using csnets.Neural.Activations;
+using csnets.Neural.Initializations;
 using csnets.Neural.Loss;
 
 namespace csnets.Neural.Networks;
@@ -7,7 +8,7 @@ public class FeedForwardNet {
     public readonly int inputSize;
     public List <DenseLayer> layers;
 
-    public FeedForwardNet ( int inputs, int numLayers, int outputs, float momentum, int? numNeuronsPerLayer_Min, int? numNeuronsPerLayer_Max ) {
+    public FeedForwardNet ( int inputs, int numLayers, int outputs, float momentum, int? numNeuronsPerLayer_Min, int? numNeuronsPerLayer_Max, IInitialization? init = null ) {
         inputSize = inputs;
         var random = new Random ();
         var currentInputSize = inputSize;
@@ -24,7 +25,8 @@ public class FeedForwardNet {
                         outputs,
                         currentInputSize,
                         random,
-                        momentum
+                        momentum,
+                        init
                     )
                 );
                 break;
@@ -36,7 +38,8 @@ public class FeedForwardNet {
                     k,
                     currentInputSize,
                     random,
-                    momentum
+                    momentum,
+                    init
                 )
             );
 
@@ -48,7 +51,8 @@ public class FeedForwardNet {
         int inputs,
         float momentum,
         int[] layers,
-        int output
+        int output,
+        IInitialization? init = null
     ) {
         inputSize = inputs;
         var random = new Random ();
@@ -56,10 +60,10 @@ public class FeedForwardNet {
         this.layers = [];
         foreach (var layer in layers)
         {
-            this.layers.Add ( new DenseLayer (layer, currentInputSize, random, momentum) );
+            this.layers.Add ( new DenseLayer (layer, currentInputSize, random, momentum, init) );
             currentInputSize = layer;
         }
-        this.layers.Add (new DenseLayer (output, currentInputSize, random, momentum));
+        this.layers.Add ( new DenseLayer (output, currentInputSize, random, momentum, init) );
     }
 
     public FeedForwardNet ( int inputSize, List <DenseLayer> layers )  {
@@ -158,7 +162,7 @@ public class FeedForwardNet {
         float[][] inputs,
         float[][] targets,
         float learningRate,
-        bool log
+        bool log = false
     ) where A : IActivation where L : ILoss {
         if (inputs.Length != targets.Length)
         {

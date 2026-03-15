@@ -1,4 +1,5 @@
 using csnets.Neural.Activations;
+using csnets.Neural.Initializations;
 namespace csnets.Neural;
 
 public class Neuron : INeuron {
@@ -10,17 +11,8 @@ public class Neuron : INeuron {
     public bool batching { get; set; }
 
 
-    /// <summary>
-    /// Naively initializes a neuron with a given Random.
-    /// Weight: -1 to 1f
-    /// Bias: 0
-    /// </summary>
-    public Neuron ( Random random, int inputSize ) {
-        weights = new float[inputSize];
-        for (int i = 0; i < inputSize; i++)
-        {
-            weights[i] = ( (float) random.NextDouble () * 2 - 1 );
-        }
+    public Neuron ( Random random, int inputSize, IInitialization init ) {
+        weights = init.InitWeights ( random, inputSize );
         bias = 0;
 
         weightAccumulator = new float[inputSize];

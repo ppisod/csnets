@@ -1,12 +1,14 @@
 using csnets.Neural.Activations;
+using csnets.Neural.Initializations;
 
 namespace csnets.Neural;
 
 public class MomentalNeuron (
     Random random,
     int inputSize,
-    float momentum
-) : Neuron ( random, inputSize ) {
+    float momentum,
+    IInitialization init
+) : Neuron ( random, inputSize, init ) {
 
     public readonly float momentum = momentum;
     public float[] weightVelocities = new float[inputSize];
@@ -60,21 +62,31 @@ public class MomentalNeuron (
         result.nextLayerBlame = pastBlames;
 
         float[] weightGradients = new float[inputs.Length];
-        // change weight proportional to activation
-        for (var index = 0; index < inputs.Length; index++)
+
+        if (!updateWeights)
         {
-            var inp = inputs[index];
-            weightVelocities[index] = ( momentum * weightVelocities[index] ) - ( inp * realBlame * learningRate );
-            weights[index] += weightVelocities[index];
-            weightGradients[index] = weightVelocities[index];
+            // Batch mode: accumulate gradients, don't update weights
+            AccumulateGradients ( inputs, realBlame );
+            result.weightGradient = weightGradients;
+            result.biasGradient = 0;
         }
+        else
+        {
+            // SGD mode: update weights immediately via momentum
+            for (var index = 0; index < inputs.Length; index++)
+            {
+                var inp = inputs[index];
+                weightVelocities[index] = ( momentum * weightVelocities[index] ) - ( inp * realBlame * learningRate );
+                weights[index] += weightVelocities[index];
+                weightGradients[index] = weightVelocities[index];
+            }
 
-        result.weightGradient = weightGradients;
+            result.weightGradient = weightGradients;
 
-        // change bias
-        biasVelocity = ( momentum * biasVelocity ) - ( realBlame * learningRate );
-        bias += biasVelocity;
-        result.biasGradient = -biasVelocity;
+            biasVelocity = ( momentum * biasVelocity ) - ( realBlame * learningRate );
+            bias += biasVelocity;
+            result.biasGradient = -biasVelocity;
+        }
 
         return result;
     }

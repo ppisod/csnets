@@ -8,6 +8,7 @@ namespace csnets.Neural.TrainingProjects;
 public class MNISTNetwork : INet {
 
     public float learnRate;
+    public int batchSize = 32;
 
     public MNISTNetwork ( int[] layers, float momentum, float learnRate ) {
         mnistData = new MNIST ();
@@ -22,16 +23,12 @@ public class MNISTNetwork : INet {
     public void Train ( int epochs ) {
         for (int i = 0; i < epochs; i++)
         {
-            mnistData.TrainSet.ForEach ( image =>
-                {
-                    net.Train <ReLU, MeanSquaredError> (
-                        image.Pixels,
-                        image.LabelOneHot,
-                        learnRate,
-                        true
-                    );
-                }
-            );
+            foreach (var batch in mnistData.TrainSet.Chunk ( batchSize ))
+            {
+                float[][] inp = batch.Select ( image => image.Pixels ).ToArray ();
+                float[][] targ = batch.Select ( image => image.LabelOneHot ).ToArray ();
+                net.Train <ReLU, MeanSquaredError> ( inp, targ, learnRate, true );
+            }
         }
     }
     public float[] Run ( float[] inputs ) {
