@@ -55,10 +55,10 @@ public class DenseLayer {
         return lastLayerBlame;
     }
 
-    public void ApplyGradients ( float learningRate, int batches ) {
+    public void ApplyGradients ( float learningRate ) {
         foreach (var neuron in neurons)
         {
-            neuron.ApplyGradients ( learningRate, batches );
+            neuron.ApplyGradients ( learningRate );
         }
     }
 

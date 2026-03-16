@@ -14,21 +14,19 @@ public class MomentalNeuron (
     public float[] weightVelocities = new float[inputSize];
     public float biasVelocity = 0;
 
-    public bool batching = false;
-
-    public override void ApplyGradients ( float learningRate, int batches ) {
+    public override void ApplyGradients ( float learningRate ) {
         for (int i = 0; i < weights.Length; i++)
         {
-            float avgGrad = weightAccumulator[i] / batches;
+            float avgGrad = weights[i].AverageGradient ();
             weightVelocities[i] = ( momentum * weightVelocities[i] ) - ( avgGrad * learningRate );
-            weights[i] += weightVelocities[i];
-            weightAccumulator[i] = 0;
+            weights[i].value += weightVelocities[i];
+            weights[i].gradients.Clear ();
         }
 
-        float avgBiasGrad = biasAccumulator / batches;
+        float avgBiasGrad = bias.AverageGradient ();
         biasVelocity = ( momentum * biasVelocity ) - ( avgBiasGrad * learningRate );
-        bias += biasVelocity;
-        biasAccumulator = 0;
+        bias.value += biasVelocity;
+        bias.gradients.Clear ();
     }
 
     public override BackPropResult BackProp <A> (
@@ -55,8 +53,7 @@ public class MomentalNeuron (
         float[] pastBlames = new float[inputs.Length];
         for (var index = 0; index < inputs.Length; index++)
         {
-            var inp = inputs[index];
-            pastBlames[index] = ( realBlame * weights[index] );
+            pastBlames[index] = realBlame * weights[index].value;
         }
 
         result.nextLayerBlame = pastBlames;
@@ -65,8 +62,12 @@ public class MomentalNeuron (
 
         if (!updateWeights)
         {
-            // Batch mode: accumulate gradients, don't update weights
-            AccumulateGradients ( inputs, realBlame );
+            // Batch mode: accumulate gradients
+            for (var index = 0; index < inputs.Length; index++)
+            {
+                weights[index].AddGradient ( realBlame * inputs[index] );
+            }
+            bias.AddGradient ( realBlame );
             result.weightGradient = weightGradients;
             result.biasGradient = 0;
         }
@@ -77,14 +78,14 @@ public class MomentalNeuron (
             {
                 var inp = inputs[index];
                 weightVelocities[index] = ( momentum * weightVelocities[index] ) - ( inp * realBlame * learningRate );
-                weights[index] += weightVelocities[index];
+                weights[index].value += weightVelocities[index];
                 weightGradients[index] = weightVelocities[index];
             }
 
             result.weightGradient = weightGradients;
 
             biasVelocity = ( momentum * biasVelocity ) - ( realBlame * learningRate );
-            bias += biasVelocity;
+            bias.value += biasVelocity;
             result.biasGradient = -biasVelocity;
         }
 

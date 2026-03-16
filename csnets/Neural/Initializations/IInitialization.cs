@@ -1,5 +1,6 @@
+using csnets.Neural;
 namespace csnets.Neural.Initializations;
 
 public interface IInitialization {
-    float[] InitWeights ( Random random, int inputSize );
+    Weight[] InitWeights ( Random random, int inputSize );
 }

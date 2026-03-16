@@ -4,19 +4,14 @@ namespace csnets.Neural;
 
 public class Neuron : INeuron {
 
-    public float[] weights { get; set; }
-    public float bias { get; set; }
-    public float[] weightAccumulator { get; set; }
-    public float biasAccumulator { get; set; }
+    public Weight[] weights { get; set; }
+    public Weight bias { get; set; }
     public bool batching { get; set; }
 
 
     public Neuron ( Random random, int inputSize, IInitialization init ) {
         weights = init.InitWeights ( random, inputSize );
-        bias = 0;
-
-        weightAccumulator = new float[inputSize];
-        biasAccumulator = 0;
+        bias = new Weight { value = 0 };
     }
 
     public virtual float ForwardPass <A> ( float[] inputs, bool activate ) where A : IActivation {
@@ -24,11 +19,9 @@ public class Neuron : INeuron {
         float sum = 0;
         for (var index = 0; index < inputs.Length; index++)
         {
-            var input = inputs[index];
-            var weight = weights[index];
-            sum += input * weight;
+            sum += inputs[index] * weights[index].value;
         }
-        sum += bias;
+        sum += bias.value;
 
         if (activate) return A.F (sum);
         return sum;
@@ -65,7 +58,7 @@ public class Neuron : INeuron {
         float[] inputBlame = new float[inputs.Length];
         for (var i = 0; i < inputs.Length; i++)
         {
-            inputBlame[i] = myFinalBlame * weights[i];
+            inputBlame[i] = myFinalBlame * weights[i].value;
         }
         result.nextLayerBlame = inputBlame;
 
@@ -76,37 +69,33 @@ public class Neuron : INeuron {
         {
             if (!updateWeights)
             {
-                weightGradients[i] = - ( myFinalBlame * inputs[i] * learningRate );
+                weights[i].AddGradient ( myFinalBlame * inputs[i] );
                 continue;
             }
-            weights[i] -= myFinalBlame * inputs[i] * learningRate;
+            weights[i].value -= myFinalBlame * inputs[i] * learningRate;
         }
 
         result.weightGradient = weightGradients;
 
-        // Update bias
-        bias -= myFinalBlame * learningRate;
+        if (!updateWeights)
+        {
+            bias.AddGradient ( myFinalBlame );
+        }
+        else
+        {
+            bias.value -= myFinalBlame * learningRate;
+        }
 
         result.biasGradient = -myFinalBlame * learningRate;
 
         return result;
     }
 
-    public virtual void AccumulateGradients ( float[] inputs, float realBlame ) {
-        for (int i = 0; i < inputs.Length; i++)
+    public virtual void ApplyGradients ( float learningRate ) {
+        foreach (var weight in weights)
         {
-            weightAccumulator[i] += realBlame * inputs[i];
+            weight.ApplyGradients ( learningRate );
         }
-
-        biasAccumulator += realBlame;
-    }
-    public virtual void ApplyGradients ( float learningRate, int batches ) {
-        for (int i = 0; i < weights.Length; i++)
-        {
-            weights[i] -= (weightAccumulator[i] / batches) * learningRate;
-            weightAccumulator[i] = 0;
-        }
-        bias -= (biasAccumulator / batches) * learningRate;
-        biasAccumulator = 0;
+        bias.ApplyGradients ( learningRate );
     }
 }

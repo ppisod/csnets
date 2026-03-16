@@ -34,4 +34,10 @@
       <PackageReference Include="ScottPlot" Version="5.1.57" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="..\README.md">
+        <Link>README.md</Link>
+      </Content>
+    </ItemGroup>
+
 </Project>

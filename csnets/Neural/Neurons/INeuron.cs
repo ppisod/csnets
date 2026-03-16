@@ -4,11 +4,8 @@ namespace csnets.Neural;
 
 public interface INeuron {
 
-    float[] weights { get; set; }
-    float bias { get; set; }
-
-    float[] weightAccumulator { get; set; }
-    float biasAccumulator { get; set; }
+    Weight[] weights { get; set; }
+    Weight bias { get; set; }
 
     bool batching { get; set; }
 
@@ -25,10 +22,29 @@ public interface INeuron {
         bool updateWeights = true
     ) where A : IActivation;
 
-    abstract void AccumulateGradients ( float[] inputs, float realBlame );
+    abstract void ApplyGradients ( float learningRate );
 
-    abstract void ApplyGradients ( float learningRate, int batches );
+}
 
+public class Weight {
+    public float value;
+    public List<float> gradients = [];
+
+    public void AddGradient ( float gradient ) {
+        gradients.Add ( gradient );
+    }
+
+    public float AverageGradient () {
+        if (gradients.Count == 0) return 0;
+        float sum = 0;
+        foreach (var g in gradients) sum += g;
+        return sum / gradients.Count;
+    }
+
+    public void ApplyGradients ( float learningRate ) {
+        value -= AverageGradient () * learningRate;
+        gradients.Clear ();
+    }
 }
 
 public struct BackPropResult {

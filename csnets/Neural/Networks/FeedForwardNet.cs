@@ -178,7 +178,7 @@ public class FeedForwardNet {
 
         foreach (var layer in layers)
         {
-            layer.ApplyGradients ( learningRate, inputs.Length );
+            layer.ApplyGradients ( learningRate );
         }
     }
 
