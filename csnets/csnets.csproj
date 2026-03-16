@@ -19,6 +19,15 @@
       <Compile Update="Neural\Initializations\HeInit.cs">
         <DependentUpon>IInitialization.cs</DependentUpon>
       </Compile>
+      <Compile Update="Neural\Optimizers\AdamOptimizer.cs">
+        <DependentUpon>IOptimizer.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Neural\Optimizers\MomentumOptimizer.cs">
+        <DependentUpon>IOptimizer.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Neural\Optimizers\SGDOptimizer.cs">
+        <DependentUpon>IOptimizer.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
