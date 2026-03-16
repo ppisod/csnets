@@ -1,13 +1,20 @@
 namespace csnets.Neural.Optimizers;
 
-public class MomentumOptimizer : IOptimizer {
+public class MomentumOptimizer ( float momentum ) : IOptimizer {
+    private readonly Dictionary<Weight, float> weightVelocities = new ();
 
-    
-
-    public void UpdateWeight ( Weight weight, float gradient, float learningRate ) {
-        throw new NotImplementedException ();
+    public void ApplyGradient ( Weight weight, float gradient, float learningRate ) {
+        float existingVelocity = weightVelocities.GetValueOrDefault ( weight, 0 );
+        existingVelocity = (momentum * existingVelocity) - (gradient * learningRate);
+        weight.value += existingVelocity;
+        weightVelocities[weight] = existingVelocity;
     }
     public void ApplyGradients ( Weight weight, float learningRate ) {
-        throw new NotImplementedException ();
+        float avgGrads = weight.AverageGradient ();
+        float existingVelocity = weightVelocities.GetValueOrDefault ( weight, 0 );
+        existingVelocity = (momentum * existingVelocity) - (avgGrads * learningRate);
+        weight.value += existingVelocity;
+        weightVelocities[weight] = existingVelocity;
+        weight.gradients.Clear ();
     }
 }
