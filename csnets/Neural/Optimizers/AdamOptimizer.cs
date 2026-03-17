@@ -19,6 +19,7 @@ public class AdamOptimizer (float meanDecay = 0.9f, float varianceDecay = 0.999f
         float varHat = variance[weight] / ( 1 - (float) Math.Pow ( varianceDecay, step ) );
         weight.value -= learningRate * meanHat / (float) Math.Sqrt ( varHat + 1e-8f );
     }
+    
     public void ApplyGradients ( Weight weight, float learningRate ) {
         float gradientSum = 0f;
         foreach (var gradient in weight.gradients)
@@ -29,4 +30,5 @@ public class AdamOptimizer (float meanDecay = 0.9f, float varianceDecay = 0.999f
         ApplyGradient ( weight, gradientMean, learningRate );
         weight.gradients.Clear ();
     }
+
 }
