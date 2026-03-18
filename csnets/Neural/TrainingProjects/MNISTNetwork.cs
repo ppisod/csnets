@@ -28,7 +28,7 @@ public class MNISTNetwork : INet {
             {
                 float[][] inp = batch.Select ( image => image.Pixels ).ToArray ();
                 float[][] targ = batch.Select ( image => image.LabelOneHot ).ToArray ();
-                net.Train <ReLU, CrossEntropyLoss> ( inp, targ, learnRate, true );
+                net.Train <ReLU, SoftmaxCrossEntropy> ( inp, targ, learnRate, true );
             }
         }
     }

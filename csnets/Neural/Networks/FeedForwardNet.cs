@@ -96,19 +96,7 @@ public class FeedForwardNet {
 
     public void DebugPrint <A, L> ( float[] inputs, float[] targets ) where A : IActivation where L : ILoss {
         var outputs = Run <A> ( inputs );
-        // for (int i = 0; i < outputs.Length; i++)
-        // {
-        //     var output = outputs[i];
-        //     var target = targets[i];
-        //     Console.WriteLine ( $"OutputN: {i}, Output: {output}, Target: {target}" );
-        // }
-
-        float loss = 0;
-        for (int i = 0; i < outputs.Length; i++)
-        {
-            loss += L.Calculate ( outputs[i], targets[i] );
-        }
-        loss *= 0.5f;
+        float loss = L.Calculate ( outputs, targets );
         Console.WriteLine ( $"Loss: {loss}" );
     }
 
@@ -118,7 +106,6 @@ public class FeedForwardNet {
             throw new Exception ( "Inputs does not match set input size." );
         }
 
-        // caching
         List <float[]> layerInputs = new List <float[]> ();
         float[] currentLayerInputs = inputs;
 
@@ -138,11 +125,7 @@ public class FeedForwardNet {
         }
 
         // Calculate initial blame from Loss
-        float[] blame = new float[outputs.Length];
-        for (var index = 0; index < outputs.Length; index++)
-        {
-            blame[index] = ( L.CalculateDerivative ( outputs[index], targets[index] ) );
-        }
+        float[] blame = L.CalculateDerivative ( outputs, targets );
 
         // Backward Pass
         for (var index = layers.Count - 1; index >= 0; index--)
@@ -172,9 +155,7 @@ public class FeedForwardNet {
 
         for (int i = 0; i < inputs.Length; i++)
         {
-
             Train <A, L> ( inputs[i], targets[i], learningRate, log, true );
-
         }
 
         foreach (var layer in layers)
