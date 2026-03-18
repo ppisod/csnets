@@ -2,6 +2,7 @@ using csnets.DataGen;
 using csnets.Neural.Activations;
 using csnets.Neural.Loss;
 using csnets.Neural.Networks;
+using csnets.Neural.Optimizers;
 
 namespace csnets.Neural.TrainingProjects;
 
@@ -10,10 +11,10 @@ public class MNISTNetwork : INet {
     public float learnRate;
     public int batchSize = 32;
 
-    public MNISTNetwork ( int[] layers, float momentum, float learnRate ) {
+    public MNISTNetwork ( int[] layers, IOptimizer optimizer, float learnRate ) {
         mnistData = new MNIST ();
         mnistData.Load ();
-        net = new FeedForwardNet (mnistData.PixelCount, momentum, layers, mnistData.LabelCount);
+        net = new FeedForwardNet (mnistData.PixelCount, optimizer, layers, mnistData.LabelCount);
         this.learnRate = learnRate;
     }
 

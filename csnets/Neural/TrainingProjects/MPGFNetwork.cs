@@ -2,6 +2,7 @@ using csnets.DataGen;
 using csnets.Neural.Activations;
 using csnets.Neural.Loss;
 using csnets.Neural.Networks;
+using csnets.Neural.Optimizers;
 
 namespace csnets.Neural.TrainingProjects;
 
@@ -11,9 +12,9 @@ public class MPGFNetwork (
     int layers,
     int minNeurons,
     int maxNeurons,
-    float momentum
+    IOptimizer optimizer
 ) : INet {
-    public FeedForwardNet net { get; set; } = new ( 2, layers, 1, momentum, minNeurons, maxNeurons );
+    public FeedForwardNet net { get; set; } = new ( 2, layers, 1, optimizer, minNeurons, maxNeurons );
     public MidPointGenFunc gen { get; set; } = new () { c = gen_C, m = gen_M };
 
     public int datasetSize = datasetSize;

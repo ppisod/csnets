@@ -1,17 +1,20 @@
 using csnets.Neural.Activations;
 using csnets.Neural.Initializations;
+using csnets.Neural.Optimizers;
 namespace csnets.Neural;
 
 public class Neuron : INeuron {
 
     public Weight[] weights { get; set; }
     public Weight bias { get; set; }
+    public IOptimizer optimizer { get; set; }
     public bool batching { get; set; }
 
 
-    public Neuron ( Random random, int inputSize, IInitialization init ) {
+    public Neuron ( Random random, int inputSize, IInitialization init, IOptimizer optimizer ) {
         weights = init.InitWeights ( random, inputSize );
         bias = new Weight { value = 0 };
+        this.optimizer = optimizer;
     }
 
     public virtual float ForwardPass <A> ( float[] inputs, bool activate ) where A : IActivation {
@@ -72,7 +75,7 @@ public class Neuron : INeuron {
                 weights[i].AddGradient ( myFinalBlame * inputs[i] );
                 continue;
             }
-            weights[i].value -= myFinalBlame * inputs[i] * learningRate;
+            optimizer.ApplyGradient ( weights[i], myFinalBlame * inputs[i], learningRate );
         }
 
         result.weightGradient = weightGradients;
@@ -83,7 +86,7 @@ public class Neuron : INeuron {
         }
         else
         {
-            bias.value -= myFinalBlame * learningRate;
+            optimizer.ApplyGradient ( bias, myFinalBlame, learningRate );
         }
 
         result.biasGradient = -myFinalBlame * learningRate;
@@ -94,8 +97,8 @@ public class Neuron : INeuron {
     public virtual void ApplyGradients ( float learningRate ) {
         foreach (var weight in weights)
         {
-            weight.ApplyGradients ( learningRate );
+            optimizer.ApplyGradients ( weight, learningRate );
         }
-        bias.ApplyGradients ( learningRate );
+        optimizer.ApplyGradients ( bias, learningRate );
     }
 }

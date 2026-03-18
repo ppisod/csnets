@@ -1,4 +1,5 @@
 using csnets.Neural.Activations;
+using csnets.Neural.Optimizers;
 
 namespace csnets.Neural;
 
@@ -6,6 +7,7 @@ public interface INeuron {
 
     Weight[] weights { get; set; }
     Weight bias { get; set; }
+    IOptimizer optimizer { get; set; }
 
     bool batching { get; set; }
 
