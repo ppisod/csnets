@@ -96,12 +96,12 @@ public class FeedForwardNet {
 
     public void DebugPrint <A, L> ( float[] inputs, float[] targets ) where A : IActivation where L : ILoss {
         var outputs = Run <A> ( inputs );
-        for (int i = 0; i < outputs.Length; i++)
-        {
-            var output = outputs[i];
-            var target = targets[i];
-            Console.WriteLine ( $"OutputN: {i}, Output: {output}, Target: {target}" );
-        }
+        // for (int i = 0; i < outputs.Length; i++)
+        // {
+        //     var output = outputs[i];
+        //     var target = targets[i];
+        //     Console.WriteLine ( $"OutputN: {i}, Output: {output}, Target: {target}" );
+        // }
 
         float loss = 0;
         for (int i = 0; i < outputs.Length; i++)

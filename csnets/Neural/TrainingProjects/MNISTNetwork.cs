@@ -9,7 +9,7 @@ namespace csnets.Neural.TrainingProjects;
 public class MNISTNetwork : INet {
 
     public float learnRate;
-    public int batchSize = 32;
+    public int batchSize = 2048;
 
     public MNISTNetwork ( int[] layers, IOptimizer optimizer, float learnRate ) {
         mnistData = new MNIST ();
@@ -28,7 +28,7 @@ public class MNISTNetwork : INet {
             {
                 float[][] inp = batch.Select ( image => image.Pixels ).ToArray ();
                 float[][] targ = batch.Select ( image => image.LabelOneHot ).ToArray ();
-                net.Train <ReLU, MeanSquaredError> ( inp, targ, learnRate, true );
+                net.Train <ReLU, CrossEntropyLoss> ( inp, targ, learnRate, true );
             }
         }
     }
