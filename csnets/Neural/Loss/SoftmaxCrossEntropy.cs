@@ -28,18 +28,19 @@ public class SoftmaxCrossEntropy : ILoss {
         {
             loss -= targets[i] * MathF.Log ( MathF.Max ( probs[i], 1e-7f ) );
         }
-        return loss;
+        return loss / outputs.Length;
     }
 
     /// <summary>
-    /// The combined softmax + cross-entropy derivative simplifies to: softmax(output) - target
+    /// The combined softmax + cross-entropy derivative simplifies to: (softmax(output) - target) / N
     /// </summary>
     public static float[] CalculateDerivative ( float[] outputs, float[] targets ) {
         float[] probs = Softmax ( outputs );
         float[] grad = new float[outputs.Length];
+        float n = outputs.Length;
         for (int i = 0; i < outputs.Length; i++)
         {
-            grad[i] = probs[i] - targets[i];
+            grad[i] = ( probs[i] - targets[i] ) / n;
         }
         return grad;
     }

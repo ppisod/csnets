@@ -2,12 +2,15 @@ using csnets.Neural.Activations;
 using csnets.Neural.Initializations;
 using csnets.Neural.Loss;
 using csnets.Neural.Optimizers;
+using csnets.Visuals.Plots;
 
 namespace csnets.Neural.Networks;
 
 public class FeedForwardNet {
+
     public readonly int inputSize;
     public List <DenseLayer> layers;
+    public LossPlotter plot = new ();
 
     public FeedForwardNet ( int inputs, int numLayers, int outputs, IOptimizer optimizer, int? numNeuronsPerLayer_Min, int? numNeuronsPerLayer_Max, IInitialization? init = null ) {
         inputSize = inputs;
@@ -94,10 +97,19 @@ public class FeedForwardNet {
         return lastDenseLayerOutput;
     }
 
-    public void DebugPrint <A, L> ( float[] inputs, float[] targets ) where A : IActivation where L : ILoss {
+    public void DebugPlot <A, L> ( float[] inputs, float[] targets ) where A : IActivation where L : ILoss {
         var outputs = Run <A> ( inputs );
         float loss = L.Calculate ( outputs, targets );
-        Console.WriteLine ( $"Loss: {loss}" );
+        plot.AddLoss ( loss );
+    }
+
+    public static void PrintProgress ( int current, int total, float loss ) {
+        int barWidth = 30;
+        float progress = (float) current / total;
+        int filled = (int) ( progress * barWidth );
+        string bar = new string ( '#', filled ) + new string ( '-', barWidth - filled );
+        Console.Write ( $"\r[{bar}] {current}/{total} loss: {loss:F4}" );
+        if (current == total) Console.WriteLine ();
     }
 
     public void Train <A, L> ( float[] inputs, float[] targets, float learningRate, bool log = true, bool batching = false ) where A : IActivation where L : ILoss {
@@ -138,7 +150,7 @@ public class FeedForwardNet {
 
         if (log)
         {
-            DebugPrint <A, L> ( inputs, targets );
+            DebugPlot <A, L> ( inputs, targets );
         }
     }
 
@@ -155,7 +167,7 @@ public class FeedForwardNet {
 
         for (int i = 0; i < inputs.Length; i++)
         {
-            Train <A, L> ( inputs[i], targets[i], learningRate, log, true );
+            Train <A, L> ( inputs[i], targets[i], learningRate, false, true );
         }
 
         foreach (var layer in layers)

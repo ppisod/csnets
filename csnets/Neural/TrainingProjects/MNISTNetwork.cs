@@ -9,9 +9,9 @@ namespace csnets.Neural.TrainingProjects;
 public class MNISTNetwork : INet {
 
     public float learnRate;
-    public int batchSize = 2048;
+    public int batchSize;
 
-    public MNISTNetwork ( int[] layers, IOptimizer optimizer, float learnRate ) {
+    public MNISTNetwork ( int[] layers, IOptimizer optimizer, float learnRate, int batchSize = 2048 ) {
         mnistData = new MNIST ();
         mnistData.Load ();
         net = new FeedForwardNet (mnistData.PixelCount, optimizer, layers, mnistData.LabelCount);
@@ -22,14 +22,24 @@ public class MNISTNetwork : INet {
 
     public FeedForwardNet net { get; set; }
     public void Train ( int epochs ) {
-        for (int i = 0; i < epochs; i++)
+        int totalSamples = mnistData.TrainSet.Count;
+        for (int epoch = 0; epoch < epochs; epoch++)
         {
+            int processed = 0;
+            float lastLoss = 0;
+            Console.WriteLine ( $"Epoch {epoch + 1}/{epochs}" );
             foreach (var batch in mnistData.TrainSet.Chunk ( batchSize ))
             {
                 float[][] inp = batch.Select ( image => image.Pixels ).ToArray ();
                 float[][] targ = batch.Select ( image => image.LabelOneHot ).ToArray ();
-                net.Train <ReLU, SoftmaxCrossEntropy> ( inp, targ, learnRate, true );
+                net.Train <ReLU, SoftmaxCrossEntropy> ( inp, targ, learnRate );
+                processed += inp.Length;
+                var outputs = net.Run <ReLU> ( inp[^1] );
+                lastLoss = SoftmaxCrossEntropy.Calculate ( outputs, targ[^1] );
+                net.plot.AddLoss ( lastLoss );
+                FeedForwardNet.PrintProgress ( processed, totalSamples, lastLoss );
             }
+            net.plot.Save ();
         }
     }
     public float[] Run ( float[] inputs ) {
@@ -40,16 +50,14 @@ public class MNISTNetwork : INet {
         foreach (var image in mnistData.TestSet)
         {
             float[] output = Run ( image.Pixels );
-            bool match = true;
-            for (int i = 0; i < output.Length; i++)
+            int predicted = 0;
+            int expected = 0;
+            for (int i = 1; i < output.Length; i++)
             {
-                if (MathF.Abs ( output[i] - image.LabelOneHot[i] ) > 0.05f)
-                {
-                    match = false;
-                    break;
-                }
+                if (output[i] > output[predicted]) predicted = i;
+                if (image.LabelOneHot[i] > image.LabelOneHot[expected]) expected = i;
             }
-            if (match) correct++;
+            if (predicted == expected) correct++;
         }
         return (float) correct / mnistData.TestSet.Count;
     }
