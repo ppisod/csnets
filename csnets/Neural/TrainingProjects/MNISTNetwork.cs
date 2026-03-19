@@ -16,11 +16,13 @@ public class MNISTNetwork : INet {
         mnistData.Load ();
         net = new FeedForwardNet (mnistData.PixelCount, optimizer, layers, mnistData.LabelCount);
         this.learnRate = learnRate;
+        this.batchSize = batchSize;
     }
 
     public MNIST mnistData { get; set; }
 
     public FeedForwardNet net { get; set; }
+    private Random rng = new ();
     public void Train ( int epochs ) {
         int totalSamples = mnistData.TrainSet.Count;
         for (int epoch = 0; epoch < epochs; epoch++)
@@ -28,6 +30,7 @@ public class MNISTNetwork : INet {
             int processed = 0;
             float lastLoss = 0;
             Console.WriteLine ( $"Epoch {epoch + 1}/{epochs}" );
+            Shuffle ( mnistData.TrainSet );
             foreach (var batch in mnistData.TrainSet.Chunk ( batchSize ))
             {
                 float[][] inp = batch.Select ( image => image.Pixels ).ToArray ();
@@ -60,6 +63,14 @@ public class MNISTNetwork : INet {
             if (predicted == expected) correct++;
         }
         return (float) correct / mnistData.TestSet.Count;
+    }
+
+    private void Shuffle <T> ( List<T> list ) {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = rng.Next ( i + 1 );
+            ( list[i], list[j] ) = ( list[j], list[i] );
+        }
     }
 
 }
